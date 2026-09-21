@@ -84,8 +84,10 @@ metadata:
    Скачалось несколько вариантов (напр. `en-orig` и `en`) — брать ручные/оригинальные
    (`-orig`), а не auto. Ничего не скачалось — идём дальше без `--subs`, это не блокер.
 
-4. **Транскрибировать** (длинные файлы — только `terminal(background=true)` +
-   `process wait`; скилл mlx-whisper: VAD+STT+LLM-коррекция, ~7 мин на 40-мин аудио):
+4. **Транскрибировать** (длинные файлы — только `terminal(background=true, notify_on_complete=true)`
+   + `process wait`; скилл mlx-whisper: VAD+STT+LLM-коррекция, ~7 мин на 40-мин аудио):
+   Без `notify_on_complete=true` процесс завершится молча — придётся опрашивать `process wait`
+   циклом (окно wait зажимается до 180 с, для 7-минутной транскрипции это несколько заходов).
    ```bash
    ~/.local/share/uv/tools/mlx-whisper/bin/python \
      ~/.hermes/skills/media/mlx-whisper/scripts/vad_transcribe.py "<mp3>" \
