@@ -1,7 +1,7 @@
 ---
 name: video-summary
 description: "Пересказ видео по ссылке — и по голой ссылке без команды."
-version: 1.10.0
+version: 1.10.1
 author: Hermes Agent
 license: MIT
 platforms: [macos]
@@ -84,6 +84,10 @@ metadata:
    ~/.local/bin/yt-dlp --js-runtimes node --skip-download \
      --print "%(title)s | %(uploader)s | %(upload_date)s | %(webpage_url)s | %(duration)s сек | %(view_count)s | %(description).500B" <URL>
    ```
+   При 429/bot-check («Sign in to confirm you're not a bot») повторить с
+   `--cookies-from-browser safari` — YouTube периодически режет голые вызовы,
+   с cookies проходит (та же лестница уже встроена в download_dated.py шага 3;
+   то же правило действует для скачивания субтитров в шаге 3b).
    По заголовку/описанию определить язык речи (гейт шага 4 скилла mlx-whisper:
    источник языка должен быть называемым — «заголовок EN», либо детект на 30 с).
    Привычка/дефолт «ru» запрещены — видео бывает на любом языке.
