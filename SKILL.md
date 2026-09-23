@@ -1,7 +1,7 @@
 ---
 name: video-summary
 description: "Пересказ видео по ссылке — и по голой ссылке без команды."
-version: 1.9.0
+version: 1.10.0
 author: Hermes Agent
 license: MIT
 platforms: [macos]
@@ -79,14 +79,17 @@ metadata:
 
 1. **Загрузить оба скилла** (`skill_view media/yt-dlp`, `skill_view media/mlx-whisper`) и следовать их процедурам. Ниже — только склейка и гейты.
 
-2. **Метаданные ДО скачивания** (это и шаг детекта языка):
+2. **Метаданные ДО скачивания** (это и шаг детекта языка, и источник контент-метаданных для шапки MD):
    ```bash
    ~/.local/bin/yt-dlp --js-runtimes node --skip-download \
-     --print "%(title)s | %(uploader)s | %(duration)s сек | %(view_count)s | %(description).500B" <URL>
+     --print "%(title)s | %(uploader)s | %(upload_date)s | %(webpage_url)s | %(duration)s сек | %(view_count)s | %(description).500B" <URL>
    ```
    По заголовку/описанию определить язык речи (гейт шага 4 скилла mlx-whisper:
    источник языка должен быть называемым — «заголовок EN», либо детект на 30 с).
    Привычка/дефолт «ru» запрещены — видео бывает на любом языке.
+   title/uploader/upload_date/webpage_url из этого вывода уходят в шаг 4 как
+   `--meta-*` (ссылку брать из `webpage_url` — каноническую, без t=/si-параметров
+   исходной ссылки юзера).
 
 3. **Скачать аудио** (обычный путь, mp3 в result-yt-dlp):
    ```bash
@@ -113,8 +116,14 @@ metadata:
      ~/.hermes/skills/media/mlx-whisper/scripts/vad_transcribe.py "<mp3>" \
      --language <detected> \
      --terms "<имена/термины из заголовка и описания через запятую>" \
-     --subs "/tmp/subs/<файл субтитров>.srt"   # если шаг 3b дал файл
+     --meta-title "<title из шага 2>" --meta-author "<uploader>" \
+     --meta-date "<upload_date YYYYMMDD→YYYY-MM-DD>" --meta-url "<webpage_url>" \
+     --subs "/tmp/subs/<файл субтитров>.srt"   # только если шаг 3b дал файл
    ```
+   `--meta-*` — контент-метаданные для шапки MD (блок пишется всегда, первым, перед
+   техническими строками). Для не-YouTube контента заполнять по аналогии из того, что
+   известно о источнике: название, автор, дата публикации (только если известна), ссылка
+   (каноническая, без t=/si-параметров); `--meta-date` без известной даты не передавать.
    `--subs` передаёт субтитры в LLM-этап как «второе мнение» поверх транскрипта Whisper
    (модель рассуждает своими знаниями, числа всегда остаются от Whisper — числовой гейт
    в коде; подробности архитектуры — в скилле mlx-whisper). Использование субтитров
