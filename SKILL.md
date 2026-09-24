@@ -1,5 +1,5 @@
 ---
-name: video-summary
+name: brain-summary
 description: "«Добавь в мозг/brain» — архивация любого контента в ~/gdrive/Brain; пересказ YouTube по голой ссылке."
 version: 1.10.1
 author: Hermes Agent
@@ -337,7 +337,7 @@ metadata:
      первичный источник, затем extract его;
      - файл-документ — прочитать (`read_file` сам извлекает docx/pdf/pptx и т.п.);
      .html — конвертер `scripts/html2md.py` этого скилла:
-     `python3 ~/.hermes/skills/video-summary/scripts/html2md.py <файл.html>`;
+     `python3 ~/.hermes/skills/brain-summary/scripts/html2md.py <файл.html>`;
      - готовый текст/пересланное сообщение — как есть.
 
      B. **Метаданные** — тот же гейт, что в шаге 4 медиа-ветки: название (заголовок

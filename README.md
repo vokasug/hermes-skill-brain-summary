@@ -1,4 +1,4 @@
-# hermes-skill-video-summary
+# hermes-skill-brain-summary
 
 Скилл [Hermes Agent](https://hermes-agent.nousresearch.com/docs) с двумя триггерами:
 
@@ -38,7 +38,7 @@ git clone https://github.com/vokasug/hermes-skill-mlx-whisper ~/.hermes/skills/m
 ### 2. Этот скилл
 
 ```bash
-git clone https://github.com/vokasug/hermes-skill-video-summary ~/.hermes/skills/video-summary
+git clone https://github.com/vokasug/hermes-skill-brain-summary ~/.hermes/skills/brain-summary
 ```
 
 Hermes подхватывает скилл автоматически; проверить: `hermes skills list`.
