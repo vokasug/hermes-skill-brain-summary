@@ -1,7 +1,7 @@
 ---
 name: brain-summary
-description: "«Добавь в мозг/brain» — архивация любого контента в ~/gdrive/Brain; пересказ YouTube по одной ссылке без команды."
-version: 1.11.1
+description: "YouTube-ссылка без команды → пересказ в Brain; «добавь в мозг/brain» — архивация любого контента (статьи, файлы, темы) в ~/gdrive/Brain."
+version: 1.11.2
 author: Hermes Agent
 license: MIT
 platforms: [macos]
