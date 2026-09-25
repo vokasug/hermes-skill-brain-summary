@@ -1,8 +1,8 @@
 ---
 name: brain-summary
-description: "YouTube-ссылка, «добавь в мозг», «+мозг» → Brain. Пересказ YouTube без команды и архивация любого контента (медиа, статьи, файлы, книги, темы) в ~/gdrive/Brain."
-version: 1.12.0
-author: Hermes Agent
+description: "YouTube-ссылка, «добавь в мозг», «+мозг» → Brain."
+version: 1.12.1
+author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
 metadata:
