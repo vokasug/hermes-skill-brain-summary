@@ -88,10 +88,13 @@ metadata:
    ~/.local/bin/yt-dlp --js-runtimes node --skip-download \
      --print "%(title)s | %(uploader)s | %(upload_date)s | %(webpage_url)s | %(duration)s сек | %(view_count)s | %(description).500B" <URL>
    ```
-   При 429/bot-check («Sign in to confirm you're not a bot») повторить с
-   `--cookies-from-browser safari` — YouTube периодически режет вызовы без cookies,
-   с cookies проходит (та же лестница уже встроена в download_dated.py шага 3;
-   то же правило действует для скачивания субтитров в шаге 3b).
+   При 429/bot-check («Sign in to confirm you're not a bot») действовать по лестнице
+   из скилла media/yt-dlp (шаг 3 Procedure), она общая для метаданных, субтитров и
+   скачивания: сначала повтор как есть через 30–60 с (429 на субтитрах — IP rate-limit,
+   решает тайминг повтора, а не браузер cookies), затем
+   `--extractor-args "youtube:player_client=android,ios,tv"`, затем
+   `--cookies-from-browser chrome`, затем оба вместе. Та же лестница действует для
+   скачивания субтитров в шаге 3b.
    По заголовку/описанию определить язык речи (гейт шага 4 скилла mlx-whisper:
    источник языка должен быть называемым — «заголовок EN», либо детект на 30 с).
    Привычка/дефолт «ru» запрещены — видео бывает на любом языке.
