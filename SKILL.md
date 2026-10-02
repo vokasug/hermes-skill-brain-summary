@@ -1,7 +1,7 @@
 ---
 name: brain-summary
 description: "+мозг, добавь в мозг, краткое содержание, YouTube-ссылка"
-version: 1.16.1
+version: 1.16.2
 author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
