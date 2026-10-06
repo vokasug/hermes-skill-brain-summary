@@ -60,29 +60,20 @@ Hermes подхватывает скилл автоматически; пров�
 
 ## Использование
 
-Ручной прогон полного пайплайна (если нужно без агента):
+Пайплайн выполняет агент по SKILL.md этого скилла, вызывая скиллы-компоненты через их
+собственные инструкции (`skill_view media/yt-dlp`, `skill_view media/mlx-whisper`,
+`skill_view brain-vector`) — чужие скрипты напрямую не вызываются, команды и пути к
+ним живут только в SKILL.md соответствующего скилла:
 
-```bash
-# 1. метаданные + детект языка
-~/.local/bin/yt-dlp --js-runtimes node --skip-download \
-  --print "%(title)s | %(uploader)s | %(duration)s сек | %(description).500B" <URL>
-
-# 2. аудио в result-yt-dlp
-python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>
-
-# 2b. субтитры (если есть — ручные или auto; не скачались — не страшно)
-~/.local/bin/yt-dlp --js-runtimes node --skip-download --write-subs --write-auto-subs \
-  --sub-langs "<lang>.*,<lang>" --sub-format "srt/vtt/best" \
-  -o "/tmp/subs/%(title).100B.%(ext)s" --no-playlist <URL>
-
-# 3. транскрибация в result-mlx-whisper (язык — из шага 1!)
-~/.local/share/uv/tools/mlx-whisper/bin/python \
-  $HERMES_HOME/skills/media/mlx-whisper/scripts/vad_transcribe.py "<mp3>" \
-  --language <detected> --terms "<имена из заголовка/описания>" \
-  --subs "/tmp/subs/<файл субтитров>.srt"   # если шаг 2b дал файл
-```
-
-Длинные файлы — через `terminal(background=true)` + `process wait` (~5 мин на 40-мин аудио). Если скрипт напечатал строку `PAYLOAD <путь>` — коррекция выполняется агентом: прочитать payload, записать исправленный `base_text` в `<имя>.corrected.txt`, затем `vad_transcribe.py --apply-corrections <payload> <corrected.txt>`.
+1. метаданные + детект языка — сырым `~/.local/bin/yt-dlp` (установленный CLI, не скрипт скилла);
+2. аудио в `~/result-yt-dlp/` — по процедуре скилла yt-dlp (`download_dated.py --audio`);
+3. субтитры (если есть) — сырым yt-dlp;
+4. транскрибация в `~/result-mlx-whisper/` — по Quick Reference скилла mlx-whisper
+   (`--language` из шага 1, `--terms`, `--meta-*`, `--subs`);
+5. коррекция — агент правит MD напрямую (patch), пост-чек `--verify` / `--finalize`
+   по инструкции mlx-whisper;
+6. пересказ в Telegram; в полном режиме — копия в `~/gdrive/Brain/`, `_sum.md` и синк
+   векторной базы по процедуре скилла brain-vector.
 
 ## Настройка под себя
 
