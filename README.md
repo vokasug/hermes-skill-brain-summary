@@ -36,14 +36,14 @@
 Ставятся вместе со своими зависимостями (ffmpeg, node, uv-инструмент mlx-whisper, модель whisper-podlodka-turbo q8):
 
 ```bash
-git clone https://github.com/vokasug/hermes-skill-yt-dlp ~/.hermes/skills/media/yt-dlp
-git clone https://github.com/vokasug/hermes-skill-mlx-whisper ~/.hermes/skills/media/mlx-whisper
+git clone https://github.com/vokasug/hermes-skill-yt-dlp $HERMES_HOME/skills/media/yt-dlp
+git clone https://github.com/vokasug/hermes-skill-mlx-whisper $HERMES_HOME/skills/media/mlx-whisper
 ```
 
 ### 2. Этот скилл
 
 ```bash
-git clone https://github.com/vokasug/hermes-skill-brain-summary ~/.hermes/skills/brain-summary
+git clone https://github.com/vokasug/hermes-skill-brain-summary $HERMES_HOME/skills/brain-summary
 ```
 
 Hermes подхватывает скилл автоматически; проверить: `hermes skills list`.
@@ -68,7 +68,7 @@ Hermes подхватывает скилл автоматически; пров�
   --print "%(title)s | %(uploader)s | %(duration)s сек | %(description).500B" <URL>
 
 # 2. аудио в result-yt-dlp
-python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>
+python3 $HERMES_HOME/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>
 
 # 2b. субтитры (если есть — ручные или auto; не скачались — не страшно)
 ~/.local/bin/yt-dlp --js-runtimes node --skip-download --write-subs --write-auto-subs \
@@ -77,7 +77,7 @@ python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>
 
 # 3. транскрибация в result-mlx-whisper (язык — из шага 1!)
 ~/.local/share/uv/tools/mlx-whisper/bin/python \
-  ~/.hermes/skills/media/mlx-whisper/scripts/vad_transcribe.py "<mp3>" \
+  $HERMES_HOME/skills/media/mlx-whisper/scripts/vad_transcribe.py "<mp3>" \
   --language <detected> --terms "<имена из заголовка/описания>" \
   --subs "/tmp/subs/<файл субтитров>.srt"   # если шаг 2b дал файл
 ```

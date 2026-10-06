@@ -1,7 +1,7 @@
 ---
 name: brain-summary
 description: "+мозг, добавь в мозг, краткое содержание, YouTube-ссылка"
-version: 1.20.0
+version: 1.21.0
 author: vokasug, Hermes Agent
 license: MIT
 platforms: [macos]
@@ -113,7 +113,10 @@ metadata:
 ## Procedure: медиа-пайплайн
 
 0. **Загрузить оба скилла** (`skill_view media/yt-dlp`, `skill_view media/mlx-whisper`)
-   и следовать их процедурам. Ниже — только склейка и гейты.
+   и следовать их процедурам. Ниже — только склейка и гейты. **Конвенция путей**:
+   команды и пути к скриптам берутся ТОЛЬКО из SKILL.md соответствующего скилла —
+   этот скилл чужие скрипты напрямую не вызывает; `$HERMES_HOME` в командах — корень
+   активного профиля Hermes (env-переменная, раскрывается shell-ом, профиль-независима).
 
 1. **Метаданные ДО скачивания** (это и шаг детекта языка, и источник контент-метаданных для шапки MD):
    ```bash
@@ -132,10 +135,9 @@ metadata:
    `--meta-*` (ссылку брать из `webpage_url` — каноническую, без t=/si-параметров
    исходной ссылки юзера).
 
-2. **Скачать аудио** (обычный путь, mp3 в result-yt-dlp):
-   ```bash
-   python3 ~/.hermes/skills/media/yt-dlp/scripts/download_dated.py --audio <URL>
-   ```
+2. **Скачать аудио** (обычный путь, mp3 в result-yt-dlp) — по процедуре скилла
+   media/yt-dlp: команда `download_dated.py --audio <URL>` из его Quick Reference
+   (загружен на шаге 0).
 
 3. **Субтитры — всегда пытаться скачать** (если у контента они есть в любом виде —
    ручные или auto): идут в коррекцию «вторым мнением» и заметно чинят ослышки
@@ -151,19 +153,17 @@ metadata:
    (`-orig`), а не auto. Не скачалось — идём дальше без `--subs`, это не блокер,
    полагаемся только на транскрибацию.
 
-4. **Транскрибировать** (длинные файлы — только `terminal(background=true, notify_on_complete=true)`
-   + `process wait`; скилл mlx-whisper: VAD+STT+подготовка коррекции, ~5 мин на 40-мин аудио):
-   Без `notify_on_complete=true` процесс завершится молча — придётся опрашивать `process wait`
-   циклом (окно wait зажимается до 180 с, для 5-минутной транскрипции это несколько заходов).
-   ```bash
-   ~/.local/share/uv/tools/mlx-whisper/bin/python \
-     ~/.hermes/skills/media/mlx-whisper/scripts/vad_transcribe.py "<mp3>" \
-     --language <detected> \
-     --terms "<имена/термины из заголовка и описания через запятую>" \
-     --meta-title "<title из шага 1>" --meta-author "<uploader>" \
-     --meta-date "<upload_date YYYYMMDD→YYYY-MM-DD>" --meta-url "<webpage_url>" \
-     --subs "/tmp/subs/<файл субтитров>.srt"   # только если шаг 3 дал файл
-   ```
+4. **Транскрибировать** — командой из Quick Reference скилла mlx-whisper (загружен на
+   шаге 0; VAD+STT+подготовка коррекции, ~5 мин на 40-мин аудио) с параметрами:
+   - аудио: `"<mp3>"`, `--language <detected>`;
+   - `--terms "<имена/термины из заголовка и описания через запятую>"`;
+   - `--meta-title "<title из шага 1>" --meta-author "<uploader>"`
+     `--meta-date "<upload_date YYYYMMDD→YYYY-MM-DD>" --meta-url "<webpage_url>"`;
+   - `--subs "/tmp/subs/<файл субтитров>.srt"` — только если шаг 3 дал файл.
+   Длинные файлы — только `terminal(background=true, notify_on_complete=true)`
+   + `process wait`. Без `notify_on_complete=true` процесс завершится молча — придётся
+   опрашивать `process wait` циклом (окно wait зажимается до 180 с, для 5-минутной
+   транскрипции это несколько заходов).
    `--meta-*` — контент-метаданные для шапки MD (блок пишется всегда, первым, перед
    техническими строками). Для не-YouTube контента заполнять по аналогии из того, что
    известно о источнике: название, автор, дата публикации, ссылка (каноническая, без
@@ -196,16 +196,9 @@ metadata:
       отдельно). Строки таймкодов `**mm:ss**` и структуру блоков не трогать (правка
       через границу блока = два отдельных patch). Полная перезапись файла
       (`write_file`) ЗАПРЕЩЕНА — её и отклонит word-diff гейт.
-   3. Пост-чек и финализация с гейтами:
-      ```bash
-      ~/.local/share/uv/tools/mlx-whisper/bin/python \
-        ~/.hermes/skills/media/mlx-whisper/scripts/vad_transcribe.py \
-        --verify "<имя>.base.json" "<имя>.md"
-      # чистый проход → финализация (штамп шапки + <имя>.corrections.md):
-      ~/.local/share/uv/tools/mlx-whisper/bin/python \
-        ~/.hermes/skills/media/mlx-whisper/scripts/vad_transcribe.py \
-        --verify "<имя>.base.json" "<имя>.md" --finalize
-      ```
+   3. Пост-чек и финализация — командами из Quick Reference скилла mlx-whisper (его
+      шаг «коррекция»): `--verify "<имя>.base.json" "<имя>.md"` до чистого прохода,
+      затем `--verify ... --finalize` (штамп шапки + `<имя>.corrections.md`).
       `--verify` сам ничего не пишет. exit 1 = нарушение гейта, в выводе причина с
       цифрами: «REJECT: баланс слов…» / «вставка N слов подряд» (word-diff бюджет —
       убрать лишние правки), список «ОТКЛОНЕНО (числа): `a` -> `b`» (числовой гейт —
@@ -237,10 +230,10 @@ metadata:
    дать больше ключевых тезисов и подробнее изложить Главную мысль, тезисы и
    Вывод — глубже раскрыть аргументы, детали, примеры и оговорки автора. Ориентир
    объёма — не более 16000 символов (см. «Правила формата ответа»).
-   После записи sum-файла ВСЕГДА запускать синк векторной базы скилла
-   `brain-vector`, не дожидаясь крона (крон каждые 4 ч остаётся страховкой):
-   `~/.local/share/uv/tools/mlx-embeddings/bin/python
-   ~/.hermes/profiles/personal/skills/brain-vector/scripts/brain_index.py`. Итог синка обрабатывать так:
+   После записи sum-файла ВСЕГДА запускать синк векторной базы, не дожидаясь крона
+   (крон каждые 4 ч остаётся страховкой) — командой из SKILL.md скилла `brain-vector`
+   (загрузить `skill_view brain-vector`, скрипт `brain_index.py` по его процедуре).
+   Итог синка обрабатывать так:
    - синк прошёл без строк «!! не распарсился» — ничего дополнительно не писать,
      в ответе синк не упоминать;
    - есть строка «!! не распарсился: <файл>» — исправить sum-файл (частая причина:
@@ -266,7 +259,7 @@ metadata:
      первичный источник, затем extract его;
    - файл-документ — прочитать (`read_file` сам извлекает docx/pdf/pptx и т.п.);
      .html — конвертер `scripts/html2md.py` этого скилла:
-     `python3 ~/.hermes/skills/brain-summary/scripts/html2md.py <файл.html>`;
+     `python3 "$HERMES_HOME/skills/brain-summary/scripts/html2md.py" <файл.html>`;
    - готовый текст/пересланное сообщение — как есть.
 
 2. **Метаданные** (только ПОЛНЫЙ режим; в САММАРИ шаг пропускается — метаданные
